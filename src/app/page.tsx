@@ -269,7 +269,7 @@ export default function Home() {
               We do HEVY stuff
             </h2>
             <p className="text-gray-700 leading-relaxed text-center mb-6">
-              We aggressively accelerate your business and make it digital.
+              We take businesses and kick them into high gear with savage innovation, explosive growth, and hardcore digital transformation. If you're looking for comfort and safety, look elsewhere.
             </p>
 
             {/* Client Application Form */}
