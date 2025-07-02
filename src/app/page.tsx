@@ -232,7 +232,7 @@ export default function Home() {
         {/* Header with logo */}
         <header className="text-center mb-8">
           <Image
-            src="/SCR-20250702-imvp.png"
+            src="/hevy_growth_logo.jpg"
             alt="HEVY Logo"
             width={192}
             height={192}
