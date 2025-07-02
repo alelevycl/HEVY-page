@@ -3,6 +3,7 @@ import { google } from 'googleapis';
 import { writeFile, unlink } from 'fs/promises';
 import { join } from 'path';
 import { tmpdir } from 'os';
+import fs from 'fs';
 
 // Configuración de Google Drive API
 const SCOPES = ['https://www.googleapis.com/auth/drive.file'];
@@ -33,7 +34,7 @@ async function uploadToGoogleDrive(filePath: string, fileName: string) {
 
     const media = {
       mimeType: 'application/octet-stream',
-      body: require('fs').createReadStream(filePath),
+      body: fs.createReadStream(filePath),
     };
 
     const response = await drive.files.create({
@@ -65,23 +66,23 @@ async function sendEmailToFormspree(data: {
   driveLink?: string;
 }) {
   try {
-    let emailData: any = {};
+    let emailData: Record<string, string> = {};
 
     if (data.type === 'cv') {
       emailData = {
         type: 'CV Application',
-        name: data.name,
-        howHeavy: data.howHeavy,
+        name: data.name || '',
+        howHeavy: data.howHeavy || '',
         driveLink: data.driveLink || 'No CV attached',
       };
     } else {
       emailData = {
         type: 'Client Application',
-        companyName: data.companyName,
-        contactPerson: data.contactPerson,
-        clientEmail: data.clientEmail,
+        companyName: data.companyName || '',
+        contactPerson: data.contactPerson || '',
+        clientEmail: data.clientEmail || '',
         clientPhone: data.clientPhone || 'Not provided',
-        projectDescription: data.projectDescription,
+        projectDescription: data.projectDescription || '',
       };
     }
 

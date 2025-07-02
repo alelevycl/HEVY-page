@@ -134,7 +134,7 @@ export default function Home() {
         const errorData = await response.json();
         setFormMessage(`Error sending CV: ${errorData.message || 'An issue occurred.'}`);
       }
-    } catch (error) {
+    } catch {
       setFormMessage('Connection error. Please try again later.');
     } finally {
       setIsSubmitting(false);
@@ -219,7 +219,7 @@ export default function Home() {
         const errorData = await response.json();
         setClientFormMessage(`Error sending application: ${errorData.message || 'An issue occurred.'}`);
       }
-    } catch (error) {
+    } catch {
       setClientFormMessage('Connection error. Please try again later.');
     } finally {
       setClientIsSubmitting(false);
@@ -269,7 +269,7 @@ export default function Home() {
               We do HEVY stuff
             </h2>
             <p className="text-gray-700 leading-relaxed text-center mb-6">
-              We take businesses and kick them into high gear with savage innovation, explosive growth, and hardcore digital transformation. If you're looking for comfort and safety, look elsewhere.
+              We take businesses and kick them into high gear with savage innovation, explosive growth, and hardcore digital transformation. If you&apos;re looking for comfort and safety, look elsewhere.
             </p>
 
             {/* Client Application Form */}
@@ -391,7 +391,7 @@ export default function Home() {
               WE HIRE NO EXCUSES
             </h1>
             <p className="text-gray-700 leading-relaxed text-center mb-8">
-              We're not looking for just anyone. We're looking for those who are too HEVY for ordinary companies.
+              We&apos;re not looking for just anyone. We&apos;re looking for those who are too HEVY for ordinary companies.
             </p>
             {/* CV Upload Form */}
             <form onSubmit={handleCvSubmit} className="space-y-6">
