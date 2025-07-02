@@ -44,7 +44,7 @@ async function uploadToGoogleDrive(filePath: string, fileName: string) {
 
     return {
       fileId: response.data.id,
-      webViewLink: response.data.webViewLink,
+      webViewLink: response.data.webViewLink || undefined,
     };
   } catch (error) {
     console.error('Error uploading to Google Drive:', error);
@@ -54,16 +54,36 @@ async function uploadToGoogleDrive(filePath: string, fileName: string) {
 
 // Función para enviar email a través de Formspree
 async function sendEmailToFormspree(data: {
-  name: string;
-  whyHeavy: string;
+  type: 'cv' | 'client';
+  name?: string;
+  howHeavy?: string;
+  companyName?: string;
+  contactPerson?: string;
+  clientEmail?: string;
+  clientPhone?: string;
+  projectDescription?: string;
   driveLink?: string;
 }) {
   try {
-    const emailData = {
-      name: data.name,
-      whyHeavy: data.whyHeavy,
-      driveLink: data.driveLink || 'No se adjuntó archivo',
-    };
+    let emailData: any = {};
+
+    if (data.type === 'cv') {
+      emailData = {
+        type: 'CV Application',
+        name: data.name,
+        howHeavy: data.howHeavy,
+        driveLink: data.driveLink || 'No CV attached',
+      };
+    } else {
+      emailData = {
+        type: 'Client Application',
+        companyName: data.companyName,
+        contactPerson: data.contactPerson,
+        clientEmail: data.clientEmail,
+        clientPhone: data.clientPhone || 'Not provided',
+        projectDescription: data.projectDescription,
+      };
+    }
 
     const response = await fetch(FORMSPREE_ENDPOINT!, {
       method: 'POST',
@@ -87,37 +107,47 @@ async function sendEmailToFormspree(data: {
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
-    const name = formData.get('name') as string;
-    const whyHeavy = formData.get('whyHeavy') as string;
-    const attachment = formData.get('attachment') as File | null;
-
-    if (!name || !whyHeavy) {
-      return NextResponse.json(
-        { error: 'Nombre y descripción son requeridos' },
-        { status: 400 }
-      );
-    }
-
+    
+    // Determine form type based on fields present
+    const hasCvFile = formData.has('cvFile');
+    const hasCompanyName = formData.has('companyName');
+    
     let driveLink: string | undefined;
 
-    // Si hay un archivo adjunto, subirlo a Google Drive
-    if (attachment) {
-      const bytes = await attachment.arrayBuffer();
+    if (hasCvFile) {
+      // CV Application Form
+      const name = formData.get('name') as string;
+      const howHeavy = formData.get('howHeavy') as string;
+      const cvFile = formData.get('cvFile') as File;
+
+      if (!name || !howHeavy || !cvFile) {
+        return NextResponse.json(
+          { error: 'Name, howHeavy, and CV file are required' },
+          { status: 400 }
+        );
+      }
+
+      // Validate file type
+      if (cvFile.type !== 'application/pdf') {
+        return NextResponse.json(
+          { error: 'Only PDF files are allowed' },
+          { status: 400 }
+        );
+      }
+
+      // Upload CV to Google Drive
+      const bytes = await cvFile.arrayBuffer();
       const buffer = Buffer.from(bytes);
       
-      // Guardar archivo temporalmente
-      const tempFilePath = join(tmpdir(), attachment.name);
+      const tempFilePath = join(tmpdir(), cvFile.name);
       await writeFile(tempFilePath, buffer);
 
       try {
-        // Subir a Google Drive
-        const uploadResult = await uploadToGoogleDrive(tempFilePath, attachment.name);
-        driveLink = uploadResult.webViewLink || undefined;
+        const uploadResult = await uploadToGoogleDrive(tempFilePath, cvFile.name);
+        driveLink = uploadResult.webViewLink;
 
-        // Limpiar archivo temporal
         await unlink(tempFilePath);
       } catch (error) {
-        // Limpiar archivo temporal en caso de error
         try {
           await unlink(tempFilePath);
         } catch (cleanupError) {
@@ -125,22 +155,70 @@ export async function POST(request: NextRequest) {
         }
         throw error;
       }
+
+      // Send email for CV application
+      await sendEmailToFormspree({
+        type: 'cv',
+        name,
+        howHeavy,
+        driveLink,
+      });
+
+      return NextResponse.json(
+        { 
+          message: 'CV sent successfully! We will contact you soon.',
+          driveLink 
+        },
+        { status: 200 }
+      );
+
+    } else if (hasCompanyName) {
+      // Client Application Form
+      const companyName = formData.get('companyName') as string;
+      const contactPerson = formData.get('contactPerson') as string;
+      const clientEmail = formData.get('clientEmail') as string;
+      const clientPhone = formData.get('clientPhone') as string;
+      const projectDescription = formData.get('projectDescription') as string;
+
+      if (!companyName || !contactPerson || !clientEmail || !projectDescription) {
+        return NextResponse.json(
+          { error: 'Company name, contact person, email, and project description are required' },
+          { status: 400 }
+        );
+      }
+
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(clientEmail)) {
+        return NextResponse.json(
+          { error: 'Please enter a valid email address' },
+          { status: 400 }
+        );
+      }
+
+      // Send email for client application
+      await sendEmailToFormspree({
+        type: 'client',
+        companyName,
+        contactPerson,
+        clientEmail,
+        clientPhone,
+        projectDescription,
+      });
+
+      return NextResponse.json(
+        { 
+          message: 'Application sent successfully! We will contact you soon.'
+        },
+        { status: 200 }
+      );
+
+    } else {
+      return NextResponse.json(
+        { error: 'Invalid form data' },
+        { status: 400 }
+      );
     }
-
-    // Enviar email a través de Formspree
-    await sendEmailToFormspree({
-      name,
-      whyHeavy,
-      driveLink: driveLink || undefined,
-    });
-
-    return NextResponse.json(
-      { 
-        message: 'Formulario enviado exitosamente',
-        driveLink 
-      },
-      { status: 200 }
-    );
 
   } catch (error) {
     console.error('Error processing form:', error);

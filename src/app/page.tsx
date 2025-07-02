@@ -1,174 +1,490 @@
 'use client';
 
-import { useState } from 'react';
-import UploadProgress from './components/UploadProgress';
+import { useState, useRef } from 'react';
+import Image from 'next/image';
 
 export default function Home() {
-  const [formData, setFormData] = useState({
-    name: '',
-    whyHeavy: '',
-    attachment: null as File | null
-  });
+  const [activeTab, setActiveTab] = useState('weAreHevy');
+  const [fileName, setFileName] = useState('No file chosen');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [message, setMessage] = useState('');
+  const [clientIsSubmitting, setClientIsSubmitting] = useState(false);
+  const [formMessage, setFormMessage] = useState('');
+  const [clientFormMessage, setClientFormMessage] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
+  // Form data states
+  const [cvFormData, setCvFormData] = useState({
+    name: '',
+    howHeavy: ''
+  });
+
+  const [clientFormData, setClientFormData] = useState({
+    companyName: '',
+    contactPerson: '',
+    clientEmail: '',
+    clientPhone: '',
+    projectDescription: ''
+  });
+
+  // Validation states
+  const [errors, setErrors] = useState({
+    name: '',
+    howHeavy: '',
+    file: '',
+    companyName: '',
+    contactPerson: '',
+    clientEmail: '',
+    projectDescription: ''
+  });
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null;
-    setFormData(prev => ({
-      ...prev,
-      attachment: file
-    }));
+    const file = e.target.files?.[0];
+    if (file) {
+      setFileName(file.name);
+    } else {
+      setFileName('No file chosen');
+    }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const triggerFileInput = () => {
+    fileInputRef.current?.click();
+  };
+
+  const validateHowHeavyField = (text: string) => {
+    const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+    const MIN_WORDS = 10;
+    
+    if (text.trim() === '') {
+      return 'This field is required.';
+    } else if (words.length < MIN_WORDS) {
+      return `You must write at least ${MIN_WORDS} words. You have ${words.length}.`;
+    }
+    return '';
+  };
+
+  const handleCvSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Reset errors
+    setErrors({
+      name: '',
+      howHeavy: '',
+      file: '',
+      companyName: '',
+      contactPerson: '',
+      clientEmail: '',
+      projectDescription: ''
+    });
+
+    let isValid = true;
+    const newErrors = { ...errors };
+
+    // Validate name
+    if (cvFormData.name.trim() === '') {
+      newErrors.name = 'Name is required.';
+      isValid = false;
+    }
+
+    // Validate howHeavy
+    const howHeavyError = validateHowHeavyField(cvFormData.howHeavy);
+    if (howHeavyError) {
+      newErrors.howHeavy = howHeavyError;
+      isValid = false;
+    }
+
+    // Validate file
+    const file = fileInputRef.current?.files?.[0];
+    if (!file) {
+      newErrors.file = 'You must attach your CV (PDF).';
+      isValid = false;
+    } else if (file.type !== 'application/pdf') {
+      newErrors.file = 'Error: Please upload PDF files only.';
+      isValid = false;
+    }
+
+    if (!isValid) {
+      setErrors(newErrors);
+      return;
+    }
+
     setIsSubmitting(true);
-    setUploadProgress(0);
-    setMessage('');
+    setFormMessage('Sending your CV, please wait...');
 
     try {
       const formDataToSend = new FormData();
-      formDataToSend.append('name', formData.name);
-      formDataToSend.append('whyHeavy', formData.whyHeavy);
-      if (formData.attachment) {
-        formDataToSend.append('attachment', formData.attachment);
+      formDataToSend.append('name', cvFormData.name);
+      formDataToSend.append('howHeavy', cvFormData.howHeavy);
+      if (file) {
+        formDataToSend.append('cvFile', file);
       }
-
-      // Simular progreso de subida
-      const progressInterval = setInterval(() => {
-        setUploadProgress(prev => {
-          if (prev >= 90) {
-            clearInterval(progressInterval);
-            return 90;
-          }
-          return prev + 10;
-        });
-      }, 200);
 
       const response = await fetch('/api/submit-form', {
         method: 'POST',
         body: formDataToSend
       });
 
-      clearInterval(progressInterval);
-      setUploadProgress(100);
-
       if (response.ok) {
-        setMessage('¡Formulario enviado exitosamente!');
-        setFormData({ name: '', whyHeavy: '', attachment: null });
-        // Reset file input
-        const fileInput = document.getElementById('attachment') as HTMLInputElement;
-        if (fileInput) fileInput.value = '';
+        setFormMessage('CV sent successfully! We will contact you soon.');
+        setCvFormData({ name: '', howHeavy: '' });
+        setFileName('No file chosen');
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
       } else {
-        const error = await response.text();
-        setMessage(`Error: ${error}`);
+        const errorData = await response.json();
+        setFormMessage(`Error sending CV: ${errorData.message || 'An issue occurred.'}`);
       }
     } catch (error) {
-      setMessage('Error al enviar el formulario. Inténtalo de nuevo.');
+      setFormMessage('Connection error. Please try again later.');
     } finally {
       setIsSubmitting(false);
-      setTimeout(() => setUploadProgress(0), 2000);
+    }
+  };
+
+  const handleClientSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Reset errors
+    setErrors({
+      name: '',
+      howHeavy: '',
+      file: '',
+      companyName: '',
+      contactPerson: '',
+      clientEmail: '',
+      projectDescription: ''
+    });
+
+    let isValid = true;
+    const newErrors = { ...errors };
+
+    // Validate company name
+    if (clientFormData.companyName.trim() === '') {
+      newErrors.companyName = 'Company Name is required.';
+      isValid = false;
+    }
+
+    // Validate contact person
+    if (clientFormData.contactPerson.trim() === '') {
+      newErrors.contactPerson = 'Contact Person is required.';
+      isValid = false;
+    }
+
+    // Validate email
+    if (clientFormData.clientEmail.trim() === '') {
+      newErrors.clientEmail = 'Email is required.';
+      isValid = false;
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clientFormData.clientEmail)) {
+      newErrors.clientEmail = 'Please enter a valid email address.';
+      isValid = false;
+    }
+
+    // Validate project description
+    if (clientFormData.projectDescription.trim() === '') {
+      newErrors.projectDescription = 'Project Description is required.';
+      isValid = false;
+    }
+
+    if (!isValid) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setClientIsSubmitting(true);
+    setClientFormMessage('Sending your application, please wait...');
+
+    try {
+      const formDataToSend = new FormData();
+      formDataToSend.append('companyName', clientFormData.companyName);
+      formDataToSend.append('contactPerson', clientFormData.contactPerson);
+      formDataToSend.append('clientEmail', clientFormData.clientEmail);
+      formDataToSend.append('clientPhone', clientFormData.clientPhone);
+      formDataToSend.append('projectDescription', clientFormData.projectDescription);
+
+      const response = await fetch('/api/submit-form', {
+        method: 'POST',
+        body: formDataToSend
+      });
+
+      if (response.ok) {
+        setClientFormMessage('Application sent successfully! We will contact you soon.');
+        setClientFormData({
+          companyName: '',
+          contactPerson: '',
+          clientEmail: '',
+          clientPhone: '',
+          projectDescription: ''
+        });
+      } else {
+        const errorData = await response.json();
+        setClientFormMessage(`Error sending application: ${errorData.message || 'An issue occurred.'}`);
+      }
+    } catch (error) {
+      setClientFormMessage('Connection error. Please try again later.');
+    } finally {
+      setClientIsSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md mx-auto">
-        <div className="bg-white rounded-lg shadow-xl p-8">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              ¿Por qué eres pesado?
-            </h1>
-            <p className="text-gray-600">
-              Comparte tu historia y adjunta evidencia
-            </p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                Nombre
-              </label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Tu nombre completo"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="whyHeavy" className="block text-sm font-medium text-gray-700 mb-2">
-                ¿Por qué eres pesado?
-              </label>
-              <textarea
-                id="whyHeavy"
-                name="whyHeavy"
-                value={formData.whyHeavy}
-                onChange={handleInputChange}
-                required
-                rows={4}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Cuéntanos tu historia..."
-              />
-            </div>
-
-            <div>
-              <label htmlFor="attachment" className="block text-sm font-medium text-gray-700 mb-2">
-                Adjuntar archivo (opcional)
-              </label>
-              <input
-                type="file"
-                id="attachment"
-                name="attachment"
-                onChange={handleFileChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif"
-              />
-              <p className="mt-1 text-sm text-gray-500">
-                Formatos permitidos: PDF, DOC, DOCX, JPG, PNG, GIF
-              </p>
-            </div>
-
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isSubmitting ? 'Enviando...' : 'Enviar formulario'}
-            </button>
-          </form>
-
-          <UploadProgress 
-            isUploading={isSubmitting && formData.attachment !== null}
-            progress={uploadProgress}
-            fileName={formData.attachment?.name}
+    <div className="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+      <div className="bg-white p-8 rounded-xl shadow-lg max-w-md w-full">
+        {/* Header with logo */}
+        <header className="text-center mb-8">
+          <Image
+            src="/SCR-20250702-imvp.png"
+            alt="HEVY Logo"
+            width={192}
+            height={192}
+            className="mx-auto mb-6 rounded-lg w-48 h-auto"
           />
+        </header>
 
-          {message && (
-            <div className={`mt-4 p-4 rounded-md ${
-              message.includes('Error') 
-                ? 'bg-red-50 text-red-700 border border-red-200' 
-                : 'bg-green-50 text-green-700 border border-green-200'
-            }`}>
-              {message}
-            </div>
-          )}
+        {/* Tab Navigation */}
+        <div className="flex justify-center border-b border-gray-200 mb-6">
+          <button
+            type="button"
+            onClick={() => setActiveTab('weAreHevy')}
+            className={`tab-button px-4 py-2 text-lg text-gray-600 hover:text-gray-900 focus:outline-none transition-colors duration-200 ${
+              activeTab === 'weAreHevy' ? 'active' : ''
+            }`}
+          >
+            We are HEVY
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('beHevy')}
+            className={`tab-button px-4 py-2 text-lg text-gray-600 hover:text-gray-900 focus:outline-none transition-colors duration-200 ${
+              activeTab === 'beHevy' ? 'active' : ''
+            }`}
+          >
+            Be HEVY
+          </button>
         </div>
+
+        {/* Tab Content - We are HEVY (Client Application Form) */}
+        {activeTab === 'weAreHevy' && (
+          <div className="tab-content pt-6">
+            <h2 className="text-4xl font-extrabold text-gray-900 tracking-wide mb-4 text-center">
+              We do HEVY stuff
+            </h2>
+            <p className="text-gray-700 leading-relaxed text-center mb-6">
+              We aggressively accelerate your business and make it digital.
+            </p>
+
+            {/* Client Application Form */}
+            <h3 className="text-xl font-semibold text-gray-800 mb-4 text-center">
+              Apply to be a Client
+            </h3>
+            <form onSubmit={handleClientSubmit} className="space-y-6">
+              {/* Company Name field */}
+              <div>
+                <label htmlFor="companyName" className="block text-sm font-medium text-gray-700 mb-1">
+                  Company Name:
+                </label>
+                <input
+                  type="text"
+                  id="companyName"
+                  value={clientFormData.companyName}
+                  onChange={(e) => setClientFormData({...clientFormData, companyName: e.target.value})}
+                  required
+                  className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                />
+                {errors.companyName && (
+                  <p className="text-red-600 text-xs mt-2">{errors.companyName}</p>
+                )}
+              </div>
+
+              {/* Contact Person field */}
+              <div>
+                <label htmlFor="contactPerson" className="block text-sm font-medium text-gray-700 mb-1">
+                  Contact Person:
+                </label>
+                <input
+                  type="text"
+                  id="contactPerson"
+                  value={clientFormData.contactPerson}
+                  onChange={(e) => setClientFormData({...clientFormData, contactPerson: e.target.value})}
+                  required
+                  className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                />
+                {errors.contactPerson && (
+                  <p className="text-red-600 text-xs mt-2">{errors.contactPerson}</p>
+                )}
+              </div>
+
+              {/* Email field */}
+              <div>
+                <label htmlFor="clientEmail" className="block text-sm font-medium text-gray-700 mb-1">
+                  Email:
+                </label>
+                <input
+                  type="email"
+                  id="clientEmail"
+                  value={clientFormData.clientEmail}
+                  onChange={(e) => setClientFormData({...clientFormData, clientEmail: e.target.value})}
+                  required
+                  className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                />
+                {errors.clientEmail && (
+                  <p className="text-red-600 text-xs mt-2">{errors.clientEmail}</p>
+                )}
+              </div>
+
+              {/* Phone field */}
+              <div>
+                <label htmlFor="clientPhone" className="block text-sm font-medium text-gray-700 mb-1">
+                  Phone (Optional):
+                </label>
+                <input
+                  type="tel"
+                  id="clientPhone"
+                  value={clientFormData.clientPhone}
+                  onChange={(e) => setClientFormData({...clientFormData, clientPhone: e.target.value})}
+                  className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                />
+              </div>
+
+              {/* Project Description field */}
+              <div>
+                <label htmlFor="projectDescription" className="block text-sm font-medium text-gray-700 mb-1">
+                  Project Description:
+                </label>
+                <textarea
+                  id="projectDescription"
+                  value={clientFormData.projectDescription}
+                  onChange={(e) => setClientFormData({...clientFormData, projectDescription: e.target.value})}
+                  rows={4}
+                  required
+                  className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm resize-y"
+                />
+                {errors.projectDescription && (
+                  <p className="text-red-600 text-xs mt-2">{errors.projectDescription}</p>
+                )}
+              </div>
+
+              {/* Submit button for client application */}
+              <button
+                type="submit"
+                disabled={clientIsSubmitting}
+                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-lg font-bold text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black transition duration-150 ease-in-out disabled:opacity-50"
+              >
+                {clientIsSubmitting ? 'Sending...' : "Let's do HEVY stuff"}
+              </button>
+              {clientFormMessage && (
+                <p className={`text-center text-sm mt-4 ${
+                  clientFormMessage.includes('Error') ? 'text-red-600' : 
+                  clientFormMessage.includes('successfully') ? 'text-green-600' : 'text-gray-600'
+                }`}>
+                  {clientFormMessage}
+                </p>
+              )}
+            </form>
+          </div>
+        )}
+
+        {/* Tab Content - Be HEVY (Form) */}
+        {activeTab === 'beHevy' && (
+          <div className="tab-content pt-6">
+            {/* "WE ARE HIRING" moved here */}
+            <h1 className="text-4xl font-extrabold text-gray-900 tracking-wide mb-8 text-center">
+              WE ARE HIRING
+            </h1>
+            {/* CV Upload Form */}
+            <form onSubmit={handleCvSubmit} className="space-y-6">
+              {/* Name field */}
+              <div>
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                  Name:
+                </label>
+                <input
+                  type="text"
+                  id="name"
+                  value={cvFormData.name}
+                  onChange={(e) => setCvFormData({...cvFormData, name: e.target.value})}
+                  required
+                  className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                />
+                {errors.name && (
+                  <p className="text-red-600 text-xs mt-2">{errors.name}</p>
+                )}
+              </div>
+
+              {/* "Tell us why you are HEVY" text area */}
+              <div>
+                <label htmlFor="howHeavy" className="block text-sm font-medium text-gray-700 mb-1">
+                  Tell us why you are HEVY
+                </label>
+                <textarea
+                  id="howHeavy"
+                  value={cvFormData.howHeavy}
+                  onChange={(e) => setCvFormData({...cvFormData, howHeavy: e.target.value})}
+                  rows={4}
+                  required
+                  className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm resize-y"
+                />
+                {errors.howHeavy && (
+                  <p className="text-red-600 text-xs mt-2">{errors.howHeavy}</p>
+                )}
+              </div>
+
+              {/* Attach PDF field */}
+              <div>
+                <label htmlFor="cvFile" className="block text-sm font-medium text-gray-700 mb-1">
+                  Attach CV (PDF only):
+                </label>
+                <div className="flex items-center mt-1">
+                  <input
+                    type="file"
+                    id="cvFile"
+                    ref={fileInputRef}
+                    accept=".pdf"
+                    required
+                    onChange={handleFileChange}
+                    className="hidden"
+                  />
+                  <button
+                    type="button"
+                    onClick={triggerFileInput}
+                    className="py-2 px-4 rounded-lg border border-gray-300 bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out"
+                  >
+                    Choose File
+                  </button>
+                  <span className="ml-2 text-sm text-gray-500">{fileName}</span>
+                </div>
+                {errors.file && (
+                  <p className="text-red-600 text-xs mt-2">{errors.file}</p>
+                )}
+              </div>
+
+              {/* Submit button with CTA */}
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-lg font-bold text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black transition duration-150 ease-in-out disabled:opacity-50"
+              >
+                {isSubmitting ? 'Sending...' : 'I want to be HEVY'}
+              </button>
+              {formMessage && (
+                <p className={`text-center text-sm mt-4 ${
+                  formMessage.includes('Error') ? 'text-red-600' : 
+                  formMessage.includes('successfully') ? 'text-green-600' : 'text-gray-600'
+                }`}>
+                  {formMessage}
+                </p>
+              )}
+            </form>
+          </div>
+        )}
       </div>
+
+      <style jsx>{`
+        .tab-button.active {
+          border-bottom: 3px solid #000;
+          font-weight: bold;
+          color: #000;
+        }
+      `}</style>
     </div>
   );
 }

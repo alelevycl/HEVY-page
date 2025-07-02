@@ -22,5 +22,51 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Hide the default file input button */
+.custom-file-input::-webkit-file-upload-button {
+  visibility: hidden;
+}
+
+.custom-file-input::before {
+  content: 'Choose File'; /* Default text for the custom button */
+  display: inline-block;
+  background: #4F46E5; /* Indigo color for the button */
+  color: white;
+  border: 1px solid #4F46E5;
+  border-radius: 0.5rem; /* Rounded corners */
+  padding: 0.5rem 1rem;
+  outline: none;
+  white-space: nowrap;
+  -webkit-user-select: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.875rem; /* text-sm */
+  transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out;
+}
+
+.custom-file-input:hover::before {
+  background: #4338CA; /* Darker indigo on hover */
+  border-color: #4338CA;
+}
+
+.custom-file-input:active::before {
+  background: #3730A3; /* Even darker on active */
+  border-color: #3730A3;
+}
+
+/* Style for the file name display */
+.file-name-display {
+  margin-left: 0.5rem;
+  font-size: 0.875rem; /* text-sm */
+  color: #6B7280; /* gray-500 */
+}
+
+/* Active tab styling */
+.tab-button.active {
+  border-bottom: 3px solid #000; /* Black border for active tab */
+  font-weight: bold;
+  color: #000;
 }
