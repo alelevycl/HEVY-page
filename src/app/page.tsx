@@ -274,7 +274,7 @@ export default function Home() {
 
             {/* Client Application Form */}
             <h3 className="text-xl font-semibold text-gray-800 mb-4 text-center">
-              Apply to be a Client
+              Think you can handle HEVY? Tell us.
             </h3>
             <form onSubmit={handleClientSubmit} className="space-y-6">
               {/* Company Name field */}
