@@ -1,36 +1,105 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Hevy Page - Formulario de Subida
 
-## Getting Started
+Un formulario moderno construido con Next.js que permite a los usuarios enviar información junto con archivos adjuntos. Los archivos se suben automáticamente a Google Drive y se envía una notificación por email a través de Formspree.
 
-First, run the development server:
+## Características
+
+- ✨ Interfaz moderna y responsiva
+- 📁 Subida de archivos a Google Drive
+- 📧 Notificaciones por email con Formspree
+- 🔄 Indicador de progreso de subida
+- 📱 Diseño responsive para móviles
+- 🎨 UI moderna con Tailwind CSS
+
+## Tecnologías utilizadas
+
+- **Next.js 14** - Framework de React
+- **TypeScript** - Tipado estático
+- **Tailwind CSS** - Framework de CSS
+- **Google Drive API** - Subida de archivos
+- **Formspree** - Envío de emails
+- **Googleapis** - Cliente de Google APIs
+
+## Configuración
+
+Antes de ejecutar el proyecto, necesitas configurar las APIs de Google Drive y Formspree. Consulta el archivo [SETUP.md](./SETUP.md) para instrucciones detalladas.
+
+### Configuración rápida
+
+1. **Google Drive API**:
+   - Crea un proyecto en Google Cloud Console
+   - Habilita la Google Drive API
+   - Crea credenciales de servicio
+   - Descarga el archivo JSON y guárdalo como `google-credentials.json`
+
+2. **Formspree**:
+   - Crea una cuenta en [Formspree.io](https://formspree.io/)
+   - Crea un nuevo formulario
+   - Copia el endpoint
+
+3. **Variables de entorno**:
+   Crea un archivo `.env.local`:
+   ```env
+   GOOGLE_DRIVE_FOLDER_ID=tu_id_de_carpeta_aqui
+   GOOGLE_APPLICATION_CREDENTIALS=./google-credentials.json
+   FORMSPREE_ENDPOINT=https://formspree.io/f/tu_endpoint_aqui
+   ```
+
+## Instalación
 
 ```bash
+# Instalar dependencias
+npm install
+
+# Ejecutar en modo desarrollo
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# Construir para producción
+npm run build
+
+# Ejecutar en producción
+npm start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Estructura del proyecto
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+src/
+├── app/
+│   ├── api/
+│   │   └── submit-form/
+│   │       └── route.ts          # API endpoint para el formulario
+│   ├── components/
+│   │   └── UploadProgress.tsx    # Componente de progreso
+│   ├── types/
+│   │   └── index.ts              # Definiciones de tipos
+│   ├── page.tsx                  # Página principal
+│   └── layout.tsx                # Layout de la aplicación
+├── SETUP.md                      # Instrucciones de configuración
+└── README.md                     # Este archivo
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Uso
 
-## Learn More
+1. Abre la aplicación en tu navegador
+2. Completa el formulario con tu nombre y descripción
+3. Opcionalmente, adjunta un archivo
+4. Haz clic en "Enviar formulario"
+5. El archivo se subirá a Google Drive y recibirás una notificación por email
 
-To learn more about Next.js, take a look at the following resources:
+## Formato de archivos soportados
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Documentos: PDF, DOC, DOCX
+- Imágenes: JPG, JPEG, PNG, GIF
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Contribuir
 
-## Deploy on Vercel
+1. Fork el proyecto
+2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
+3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
+5. Abre un Pull Request
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Licencia
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
