@@ -236,7 +236,7 @@ export default function Home() {
             alt="HEVY Logo"
             width={192}
             height={192}
-            className="mx-auto mb-6 rounded-lg w-48 h-auto"
+            className="mx-auto mb-6 w-28 h-auto"
           />
         </header>
 
