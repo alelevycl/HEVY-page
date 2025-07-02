@@ -386,10 +386,13 @@ export default function Home() {
         {/* Tab Content - Be HEVY (Form) */}
         {activeTab === 'beHevy' && (
           <div className="tab-content pt-6">
-            {/* "WE ARE HIRING" moved here */}
-            <h1 className="text-4xl font-extrabold text-gray-900 tracking-wide mb-8 text-center">
-              WE ARE HIRING
+            {/* "WE HIRE NO EXCUSES" y descripción */}
+            <h1 className="text-4xl font-extrabold text-gray-900 tracking-wide mb-2 text-center">
+              WE HIRE NO EXCUSES
             </h1>
+            <p className="text-gray-700 leading-relaxed text-center mb-8">
+              We're not looking for just anyone. We're looking for those who are too HEVY for ordinary companies.
+            </p>
             {/* CV Upload Form */}
             <form onSubmit={handleCvSubmit} className="space-y-6">
               {/* Name field */}
