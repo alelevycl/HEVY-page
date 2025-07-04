@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Name and howHeavy are required' }, { status: 400 });
     }
 
-    let attachments = [];
+    const attachments = [];
     if (cvFile) {
       const bytes = await cvFile.arrayBuffer();
       attachments.push({
@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ data }, { status: 200 });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed to send email' }, { status: 500 });
   }
 }
