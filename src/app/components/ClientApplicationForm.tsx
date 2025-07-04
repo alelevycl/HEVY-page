@@ -57,19 +57,21 @@ export default function ClientApplicationForm() {
     setClientIsSubmitting(true);
     setClientFormMessage(t.sendingApplication);
     try {
-      const formDataToSend = new FormData();
-      formDataToSend.append('companyName', clientFormData.companyName);
-      formDataToSend.append('contactPerson', clientFormData.contactPerson);
-      formDataToSend.append('clientEmail', clientFormData.clientEmail);
-      formDataToSend.append('clientPhone', clientFormData.clientPhone);
-      formDataToSend.append('projectDescription', clientFormData.projectDescription);
-      formDataToSend.append('formType', 'contactForm');
-      const response = await fetch('/api/send-email', {
+      const response = await fetch('/api/client-inquiry', {
         method: 'POST',
-        body: formDataToSend
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          companyName: clientFormData.companyName,
+          contactPerson: clientFormData.contactPerson,
+          clientEmail: clientFormData.clientEmail,
+          clientPhone: clientFormData.clientPhone,
+          projectDescription: clientFormData.projectDescription,
+        })
       });
       if (response.ok) {
-        setClientFormMessage(t.applicationSent);
+        setClientFormMessage('Application sent successfully! We will contact you soon.');
         setClientFormData({
           companyName: '',
           contactPerson: '',
@@ -79,10 +81,10 @@ export default function ClientApplicationForm() {
         });
       } else {
         const errorData = await response.json();
-        setClientFormMessage(`${t.errorSendingApplication} ${errorData.error || t.connectionError}`);
+        setClientFormMessage(`Error sending application: ${errorData.error || 'An issue occurred.'}`);
       }
     } catch {
-      setClientFormMessage(t.connectionError);
+      setClientFormMessage('Connection error. Please try again later.');
     } finally {
       setClientIsSubmitting(false);
     }

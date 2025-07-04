@@ -76,26 +76,25 @@ export default function BeHevyForm() {
       formDataToSend.append('name', cvFormData.name);
       formDataToSend.append('howHeavy', cvFormData.howHeavy);
       if (file) {
-        formDataToSend.append('attachment', file);
+        formDataToSend.append('cvFile', file);
       }
-      formDataToSend.append('formType', 'applicationForm');
-      const response = await fetch('/api/send-email', {
+      const response = await fetch('/api/job-application', {
         method: 'POST',
         body: formDataToSend
       });
       if (response.ok) {
-        setFormMessage(t.cvSent);
+        setFormMessage('CV sent successfully! We will contact you soon.');
         setCvFormData({ name: '', howHeavy: '' });
-        setFileName(t.noFile);
+        setFileName('No file chosen');
         if (fileInputRef.current) {
           fileInputRef.current.value = '';
         }
       } else {
         const errorData = await response.json();
-        setFormMessage(`${t.errorSendingCV} ${errorData.error || t.connectionError}`);
+        setFormMessage(`Error sending CV: ${errorData.error || 'An issue occurred.'}`);
       }
     } catch {
-      setFormMessage(t.connectionError);
+      setFormMessage('Connection error. Please try again later.');
     } finally {
       setIsSubmitting(false);
     }
