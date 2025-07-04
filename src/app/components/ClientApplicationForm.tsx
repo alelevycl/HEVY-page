@@ -1,6 +1,10 @@
 import { useState } from 'react';
+import { useLanguage } from '../i18n/LanguageContext';
+import { translations } from '../i18n/translations';
 
 export default function ClientApplicationForm() {
+  const { language } = useLanguage();
+  const t = translations[language];
   const [clientFormData, setClientFormData] = useState({
     companyName: '',
     contactPerson: '',
@@ -28,22 +32,22 @@ export default function ClientApplicationForm() {
     let isValid = true;
     const newErrors = { ...errors };
     if (clientFormData.companyName.trim() === '') {
-      newErrors.companyName = 'Company Name is required.';
+      newErrors.companyName = t.companyNameRequired;
       isValid = false;
     }
     if (clientFormData.contactPerson.trim() === '') {
-      newErrors.contactPerson = 'Contact Person is required.';
+      newErrors.contactPerson = t.contactPersonRequired;
       isValid = false;
     }
     if (clientFormData.clientEmail.trim() === '') {
-      newErrors.clientEmail = 'Email is required.';
+      newErrors.clientEmail = t.emailRequired;
       isValid = false;
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clientFormData.clientEmail)) {
-      newErrors.clientEmail = 'Please enter a valid email address.';
+      newErrors.clientEmail = t.validEmail;
       isValid = false;
     }
     if (clientFormData.projectDescription.trim() === '') {
-      newErrors.projectDescription = 'Project Description is required.';
+      newErrors.projectDescription = t.projectDescriptionRequired;
       isValid = false;
     }
     if (!isValid) {
@@ -51,7 +55,7 @@ export default function ClientApplicationForm() {
       return;
     }
     setClientIsSubmitting(true);
-    setClientFormMessage('Sending your application, please wait...');
+    setClientFormMessage(t.sendingApplication);
     try {
       const formDataToSend = new FormData();
       formDataToSend.append('companyName', clientFormData.companyName);
@@ -59,12 +63,13 @@ export default function ClientApplicationForm() {
       formDataToSend.append('clientEmail', clientFormData.clientEmail);
       formDataToSend.append('clientPhone', clientFormData.clientPhone);
       formDataToSend.append('projectDescription', clientFormData.projectDescription);
-      const response = await fetch('/api/submit-form', {
+      formDataToSend.append('formType', 'contactForm');
+      const response = await fetch('/api/send-email', {
         method: 'POST',
         body: formDataToSend
       });
       if (response.ok) {
-        setClientFormMessage('Application sent successfully! We will contact you soon.');
+        setClientFormMessage(t.applicationSent);
         setClientFormData({
           companyName: '',
           contactPerson: '',
@@ -74,10 +79,10 @@ export default function ClientApplicationForm() {
         });
       } else {
         const errorData = await response.json();
-        setClientFormMessage(`Error sending application: ${errorData.message || 'An issue occurred.'}`);
+        setClientFormMessage(`${t.errorSendingApplication} ${errorData.error || t.connectionError}`);
       }
     } catch {
-      setClientFormMessage('Connection error. Please try again later.');
+      setClientFormMessage(t.connectionError);
     } finally {
       setClientIsSubmitting(false);
     }
@@ -86,18 +91,18 @@ export default function ClientApplicationForm() {
   return (
     <div className="tab-content pt-6">
       <h2 className="text-4xl font-extrabold text-gray-900 tracking-wide mb-4 text-center">
-        We do HEVY stuff
+        {t.weDoHevyStuff}
       </h2>
       <p className="text-gray-700 leading-relaxed text-center mb-6">
-        We take businesses and kick them into high gear with savage innovation, explosive growth, and hardcore digital transformation. If you&apos;re looking for comfort and safety, look elsewhere.
+        {t.weDoHevyDesc}
       </p>
       <h3 className="text-xl font-semibold text-gray-800 mb-4 text-center">
-        Think you can handle HEVY? Tell us.
+        {t.thinkYouCan}
       </h3>
       <form onSubmit={handleClientSubmit} className="space-y-6">
         <div>
           <label htmlFor="companyName" className="block text-sm font-medium text-gray-700 mb-1">
-            Company Name:
+            {t.companyName}
           </label>
           <input
             type="text"
@@ -113,7 +118,7 @@ export default function ClientApplicationForm() {
         </div>
         <div>
           <label htmlFor="contactPerson" className="block text-sm font-medium text-gray-700 mb-1">
-            Contact Person:
+            {t.contactPerson}
           </label>
           <input
             type="text"
@@ -129,7 +134,7 @@ export default function ClientApplicationForm() {
         </div>
         <div>
           <label htmlFor="clientEmail" className="block text-sm font-medium text-gray-700 mb-1">
-            Email:
+            {t.email}
           </label>
           <input
             type="email"
@@ -145,7 +150,7 @@ export default function ClientApplicationForm() {
         </div>
         <div>
           <label htmlFor="clientPhone" className="block text-sm font-medium text-gray-700 mb-1">
-            Phone (Optional):
+            {t.phone}
           </label>
           <input
             type="tel"
@@ -157,7 +162,7 @@ export default function ClientApplicationForm() {
         </div>
         <div>
           <label htmlFor="projectDescription" className="block text-sm font-medium text-gray-700 mb-1">
-            Project Description:
+            {t.projectDescription}
           </label>
           <textarea
             id="projectDescription"
@@ -176,12 +181,12 @@ export default function ClientApplicationForm() {
           disabled={clientIsSubmitting}
           className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-lg font-bold text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black transition duration-150 ease-in-out disabled:opacity-50"
         >
-          {clientIsSubmitting ? 'Sending...' : "Let's do HEVY stuff"}
+          {clientIsSubmitting ? t.sending : t.letsDoHevy}
         </button>
         {clientFormMessage && (
           <p className={`text-center text-sm mt-4 ${
             clientFormMessage.includes('Error') ? 'text-red-600' : 
-            clientFormMessage.includes('successfully') ? 'text-green-600' : 'text-gray-600'
+            clientFormMessage.includes('éxito') || clientFormMessage.includes('successfully') ? 'text-green-600' : 'text-gray-600'
           }`}>
             {clientFormMessage}
           </p>
