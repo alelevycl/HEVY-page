@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import ClientApplicationForm, { validateClientForm } from '../app/components/ClientApplicationForm';
 import { LanguageProvider } from '../app/i18n/LanguageContext';
 import { translations } from '../app/i18n/translations';
@@ -92,7 +92,7 @@ describe('ClientApplicationForm', () => {
   });
 
   it('envía el formulario correctamente y dispara evento de Analytics', async () => {
-    const { event } = require('@/lib/gtag');
+    const { event } = await import('@/lib/gtag');
     (global.fetch as jest.Mock).mockResolvedValueOnce({ ok: true, json: async () => ({}) });
     renderWithProvider(<ClientApplicationForm />);
     fireEvent.change(screen.getByLabelText(/company name/i), { target: { value: 'Empresa Test' } });

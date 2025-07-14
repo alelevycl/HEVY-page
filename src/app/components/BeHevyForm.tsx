@@ -114,7 +114,7 @@ export default function BeHevyForm() {
       <p className="text-gray-700 leading-relaxed text-center mb-8">
         {t.weHireNoExcusesDesc}
       </p>
-      <form onSubmit={handleCvSubmit} className="space-y-6">
+      <form onSubmit={handleCvSubmit} className="space-y-6" aria-label="Formulario de aplicación de trabajo">
         <div>
           <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
             {t.name}
@@ -122,13 +122,16 @@ export default function BeHevyForm() {
           <input
             type="text"
             id="name"
+            name="name"
             value={cvFormData.name}
             onChange={(e) => setCvFormData({...cvFormData, name: e.target.value})}
             required
+            aria-required="true"
+            aria-describedby={errors.name ? "name-error" : undefined}
             className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
           />
           {errors.name && (
-            <p className="text-red-600 text-xs mt-2">{errors.name}</p>
+            <p id="name-error" className="text-red-600 text-xs mt-2" role="alert">{errors.name}</p>
           )}
         </div>
         <div>
@@ -137,14 +140,17 @@ export default function BeHevyForm() {
           </label>
           <textarea
             id="howHeavy"
+            name="howHeavy"
             value={cvFormData.howHeavy}
             onChange={(e) => setCvFormData({...cvFormData, howHeavy: e.target.value})}
             rows={4}
             required
+            aria-required="true"
+            aria-describedby={errors.howHeavy ? "howHeavy-error" : undefined}
             className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm resize-y"
           />
           {errors.howHeavy && (
-            <p className="text-red-600 text-xs mt-2">{errors.howHeavy}</p>
+            <p id="howHeavy-error" className="text-red-600 text-xs mt-2" role="alert">{errors.howHeavy}</p>
           )}
         </div>
         <div>
@@ -155,37 +161,42 @@ export default function BeHevyForm() {
             <input
               type="file"
               id="cvFile"
+              name="cvFile"
               ref={fileInputRef}
               accept=".pdf"
               required
+              aria-required="true"
+              aria-describedby={errors.file ? "file-error" : undefined}
               onChange={handleFileChange}
               className="hidden"
             />
             <button
               type="button"
               onClick={triggerFileInput}
+              aria-label={`${t.chooseFile} - ${t.attachCV}`}
               className="py-2 px-4 rounded-lg border border-gray-300 bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out"
             >
               {t.chooseFile}
             </button>
-            <span className="ml-2 text-sm text-gray-500">{fileName}</span>
+            <span className="ml-2 text-sm text-gray-500" aria-live="polite">{fileName}</span>
           </div>
           {errors.file && (
-            <p className="text-red-600 text-xs mt-2">{errors.file}</p>
+            <p id="file-error" className="text-red-600 text-xs mt-2" role="alert">{errors.file}</p>
           )}
         </div>
         <button
           type="submit"
           disabled={isSubmitting}
+          aria-describedby={formMessage ? "form-message" : undefined}
           className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-lg font-bold text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black transition duration-150 ease-in-out disabled:opacity-50"
         >
           {isSubmitting ? t.sending : t.iWantToBeHevy}
         </button>
         {formMessage && (
-          <p className={`text-center text-sm mt-4 ${
+          <p id="form-message" className={`text-center text-sm mt-4 ${
             formMessage.includes('Error') ? 'text-red-600' : 
             formMessage.includes('éxito') || formMessage.includes('successfully') ? 'text-green-600' : 'text-gray-600'
-          }`}>
+          }`} role="alert">
             {formMessage}
           </p>
         )}

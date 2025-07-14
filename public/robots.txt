@@ -1,2 +1,8 @@
 User-agent: *
-Allow: / 
+Allow: /
+
+# Sitemap
+Sitemap: https://hevy.la/sitemap.xml
+
+# Crawl-delay
+Crawl-delay: 1 

@@ -8,8 +8,8 @@ import Script from "next/script";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "we are HEVY",
-  description: "Impulsa tu empresa con estrategias digitales, marketing innovador, ventas y crecimiento acelerado. HEVY es tu socio para la transformación y el éxito online.",
+  title: "HEVY: Latin America's Digital Growth Accelerator",
+  description: "HEVY: Latin America's Digital Growth Accelerator. Estrategia. Tecnología. Resultados. Aceleramos negocios. Redefinimos estrategias. Dominamos el crecimiento digital.",
   keywords: [
     "marketing digital",
     "crecimiento empresarial",
@@ -20,25 +20,81 @@ export const metadata: Metadata = {
     "acelerar negocios",
     "consultoría digital",
     "agencia de marketing",
-    "growth hacking"
+    "growth hacking",
+    "acelerador digital",
+    "latinoamérica",
+    "estrategia digital",
+    "crecimiento acelerado"
   ],
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
   openGraph: {
-    title: "we are HEVY",
-    description: "Impulsa tu empresa con estrategias digitales, marketing innovador, ventas y crecimiento acelerado. HEVY es tu socio para la transformación y el éxito online.",
-    url: "https://iamhevy.com/",
+    title: "HEVY: Latin America's Digital Growth Accelerator",
+    description: "Aceleramos negocios. Redefinimos estrategias. Dominamos el crecimiento digital.",
+    url: "https://hevy.la/",
     siteName: "HEVY",
     images: [
       {
-        url: "/hevy_growth_logo.jpg",
-        width: 400,
-        height: 400,
-        alt: "HEVY logo"
+        url: "https://hevy.la/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "HEVY - Latin America's Digital Growth Accelerator"
       }
     ],
     locale: "es_ES",
     type: "website"
   },
-  metadataBase: new URL("https://iamhevy.com/")
+  twitter: {
+    card: "summary_large_image",
+    title: "HEVY: Latin America's Digital Growth Accelerator",
+    description: "Aceleramos negocios. Redefinimos estrategias. Dominamos el crecimiento digital.",
+    images: ["https://hevy.la/og-image.jpg"],
+  },
+  alternates: {
+    canonical: "https://hevy.la/",
+    languages: {
+      'es': "https://hevy.la/",
+      'en': "https://hevy.la/en/",
+      'x-default': "https://hevy.la/"
+    }
+  },
+  metadataBase: new URL("https://hevy.la/"),
+  viewport: "width=device-width, initial-scale=1"
+};
+
+// Structured Data JSON-LD
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "HEVY",
+  "url": "https://hevy.la/",
+  "logo": "https://hevy.la/logo-hevy.png",
+  "description": "Latin America's Digital Growth Accelerator. Estrategia. Tecnología. Resultados.",
+  "sameAs": [
+    "https://www.linkedin.com/company/hevy-growth"
+  ],
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "telephone": "+507-0000-0000",
+    "contactType": "Customer Service",
+    "areaServed": "Latin America",
+    "availableLanguage": "Spanish"
+  },
+  "address": {
+    "@type": "PostalAddress",
+    "addressRegion": "Latin America"
+  },
+  "foundingDate": "2024",
+  "slogan": "Aceleramos negocios. Redefinimos estrategias. Dominamos el crecimiento digital."
 };
 
 export default function RootLayout({
@@ -47,12 +103,40 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="es">
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="canonical" href="https://hevy.la/" />
+        <meta name="robots" content="index, follow" />
+        
+        {/* Hreflang Tags */}
+        <link rel="alternate" hrefLang="es" href="https://hevy.la/" />
+        <link rel="alternate" hrefLang="en" href="https://hevy.la/en/" />
+        <link rel="alternate" hrefLang="x-default" href="https://hevy.la/" />
+        
+        {/* Structured Data */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(structuredData)
+          }}
+        />
+      </head>
       <body className={inter.className}>
         <LanguageProvider>
-          {children}
+          <header role="banner" className="bg-white border-b border-gray-200">
+            <nav role="navigation" aria-label="Navegación Principal" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              {/* Aquí iría la navegación principal cuando se implemente */}
+            </nav>
+          </header>
+
+          <main role="main" className="flex-1">
+            {children}
+          </main>
+
           <Footer />
         </LanguageProvider>
+        
         {process.env.NODE_ENV === "production" && (
           <>
             <Script

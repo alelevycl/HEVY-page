@@ -9,7 +9,7 @@ export const validateClientForm = (formData: {
   contactPerson: string;
   clientEmail: string;
   projectDescription: string;
-}, t: any) => {
+}, t: Record<string, string>) => {
   const errors = {
     companyName: '',
     contactPerson: '',
@@ -128,7 +128,7 @@ export default function ClientApplicationForm() {
       <h3 className="text-xl font-semibold text-gray-800 mb-4 text-center">
         {t.thinkYouCan}
       </h3>
-      <form onSubmit={handleClientSubmit} className="space-y-6">
+      <form onSubmit={handleClientSubmit} className="space-y-6" aria-label="Formulario de consulta de cliente">
         <div>
           <label htmlFor="companyName" className="block text-sm font-medium text-gray-700 mb-1">
             {t.companyName}
@@ -136,13 +136,16 @@ export default function ClientApplicationForm() {
           <input
             type="text"
             id="companyName"
+            name="companyName"
             value={clientFormData.companyName}
             onChange={(e) => setClientFormData({...clientFormData, companyName: e.target.value})}
             required
+            aria-required="true"
+            aria-describedby={errors.companyName ? "companyName-error" : undefined}
             className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
           />
           {errors.companyName && (
-            <p className="text-red-600 text-xs mt-2">{errors.companyName}</p>
+            <p id="companyName-error" className="text-red-600 text-xs mt-2" role="alert">{errors.companyName}</p>
           )}
         </div>
         <div>
@@ -152,13 +155,16 @@ export default function ClientApplicationForm() {
           <input
             type="text"
             id="contactPerson"
+            name="contactPerson"
             value={clientFormData.contactPerson}
             onChange={(e) => setClientFormData({...clientFormData, contactPerson: e.target.value})}
             required
+            aria-required="true"
+            aria-describedby={errors.contactPerson ? "contactPerson-error" : undefined}
             className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
           />
           {errors.contactPerson && (
-            <p className="text-red-600 text-xs mt-2">{errors.contactPerson}</p>
+            <p id="contactPerson-error" className="text-red-600 text-xs mt-2" role="alert">{errors.contactPerson}</p>
           )}
         </div>
         <div>
@@ -168,13 +174,16 @@ export default function ClientApplicationForm() {
           <input
             type="email"
             id="clientEmail"
+            name="clientEmail"
             value={clientFormData.clientEmail}
             onChange={(e) => setClientFormData({...clientFormData, clientEmail: e.target.value})}
             required
+            aria-required="true"
+            aria-describedby={errors.clientEmail ? "clientEmail-error" : undefined}
             className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
           />
           {errors.clientEmail && (
-            <p className="text-red-600 text-xs mt-2">{errors.clientEmail}</p>
+            <p id="clientEmail-error" className="text-red-600 text-xs mt-2" role="alert">{errors.clientEmail}</p>
           )}
         </div>
         <div>
@@ -184,6 +193,7 @@ export default function ClientApplicationForm() {
           <input
             type="tel"
             id="clientPhone"
+            name="clientPhone"
             value={clientFormData.clientPhone}
             onChange={(e) => setClientFormData({...clientFormData, clientPhone: e.target.value})}
             className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
@@ -195,28 +205,32 @@ export default function ClientApplicationForm() {
           </label>
           <textarea
             id="projectDescription"
+            name="projectDescription"
             value={clientFormData.projectDescription}
             onChange={(e) => setClientFormData({...clientFormData, projectDescription: e.target.value})}
             rows={4}
             required
+            aria-required="true"
+            aria-describedby={errors.projectDescription ? "projectDescription-error" : undefined}
             className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm resize-y"
           />
           {errors.projectDescription && (
-            <p className="text-red-600 text-xs mt-2">{errors.projectDescription}</p>
+            <p id="projectDescription-error" className="text-red-600 text-xs mt-2" role="alert">{errors.projectDescription}</p>
           )}
         </div>
         <button
           type="submit"
           disabled={clientIsSubmitting}
+          aria-describedby={clientFormMessage ? "form-message" : undefined}
           className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-lg font-bold text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black transition duration-150 ease-in-out disabled:opacity-50"
         >
           {clientIsSubmitting ? t.sending : t.letsDoHevy}
         </button>
         {clientFormMessage && (
-          <p className={`text-center text-sm mt-4 ${
+          <p id="form-message" className={`text-center text-sm mt-4 ${
             clientFormMessage.includes('Error') ? 'text-red-600' : 
             clientFormMessage.includes('éxito') || clientFormMessage.includes('successfully') ? 'text-green-600' : 'text-gray-600'
-          }`}>
+          }`} role="alert">
             {clientFormMessage}
           </p>
         )}

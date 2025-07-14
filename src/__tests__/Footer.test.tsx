@@ -27,8 +27,8 @@ describe('Footer', () => {
     expect(screen.getByText(/síguenos en/i)).toBeInTheDocument();
   });
 
-  it('dispara el evento de Analytics al hacer click en LinkedIn', () => {
-    const { event } = require('@/lib/gtag');
+  it('dispara el evento de Analytics al hacer click en LinkedIn', async () => {
+    const { event } = await import('@/lib/gtag');
     renderWithProvider(<Footer />);
     const link = screen.getByRole('link');
     fireEvent.click(link);
