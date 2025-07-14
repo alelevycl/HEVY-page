@@ -3,6 +3,44 @@ import { useLanguage } from '../i18n/LanguageContext';
 import { translations } from '../i18n/translations';
 import { event as gaEvent } from "@/lib/gtag";
 
+// Función pura para validación - testeable de forma unitaria
+export const validateClientForm = (formData: {
+  companyName: string;
+  contactPerson: string;
+  clientEmail: string;
+  projectDescription: string;
+}, t: any) => {
+  const errors = {
+    companyName: '',
+    contactPerson: '',
+    clientEmail: '',
+    projectDescription: ''
+  };
+  let isValid = true;
+
+  if (formData.companyName.trim() === '') {
+    errors.companyName = t.companyNameRequired;
+    isValid = false;
+  }
+  if (formData.contactPerson.trim() === '') {
+    errors.contactPerson = t.contactPersonRequired;
+    isValid = false;
+  }
+  if (formData.clientEmail.trim() === '') {
+    errors.clientEmail = t.emailRequired;
+    isValid = false;
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.clientEmail)) {
+    errors.clientEmail = t.validEmail;
+    isValid = false;
+  }
+  if (formData.projectDescription.trim() === '') {
+    errors.projectDescription = t.projectDescriptionRequired;
+    isValid = false;
+  }
+
+  return { isValid, errors };
+};
+
 export default function ClientApplicationForm() {
   const { language } = useLanguage();
   const t = translations[language];
@@ -30,31 +68,14 @@ export default function ClientApplicationForm() {
       clientEmail: '',
       projectDescription: ''
     });
-    let isValid = true;
-    const newErrors = { ...errors };
-    if (clientFormData.companyName.trim() === '') {
-      newErrors.companyName = t.companyNameRequired;
-      isValid = false;
-    }
-    if (clientFormData.contactPerson.trim() === '') {
-      newErrors.contactPerson = t.contactPersonRequired;
-      isValid = false;
-    }
-    if (clientFormData.clientEmail.trim() === '') {
-      newErrors.clientEmail = t.emailRequired;
-      isValid = false;
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clientFormData.clientEmail)) {
-      newErrors.clientEmail = t.validEmail;
-      isValid = false;
-    }
-    if (clientFormData.projectDescription.trim() === '') {
-      newErrors.projectDescription = t.projectDescriptionRequired;
-      isValid = false;
-    }
+    
+    const { isValid, errors: validationErrors } = validateClientForm(clientFormData, t);
+    
     if (!isValid) {
-      setErrors(newErrors);
+      setErrors(validationErrors);
       return;
     }
+    
     setClientIsSubmitting(true);
     setClientFormMessage(t.sendingApplication);
     gaEvent({
