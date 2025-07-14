@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { translations } from '../i18n/translations';
+import { event as gaEvent } from "@/lib/gtag";
 
 export default function ClientApplicationForm() {
   const { language } = useLanguage();
@@ -56,6 +57,11 @@ export default function ClientApplicationForm() {
     }
     setClientIsSubmitting(true);
     setClientFormMessage(t.sendingApplication);
+    gaEvent({
+      action: "submit_form",
+      category: "Form",
+      label: "Client Application",
+    });
     try {
       const response = await fetch('/api/client-inquiry', {
         method: 'POST',

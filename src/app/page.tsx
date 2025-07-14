@@ -13,7 +13,8 @@ export default function Home() {
   const t = translations[language];
 
   return (
-    <div className="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+    <div className="bg-gray-100 min-h-screen flex flex-col">
+      <div className="flex-1 flex items-center justify-center p-4">
       {/* Selector de idioma arriba a la derecha, fuera del contenedor */}
       <div className="fixed top-6 right-8 z-20">
         <nav className="flex gap-1 text-base select-none">
@@ -78,6 +79,7 @@ export default function Home() {
             color: #000;
           }
         `}</style>
+      </div>
       </div>
     </div>
   );

@@ -40,6 +40,8 @@ export const translations = {
     language: 'Language',
     english: 'English',
     spanish: 'Español',
+    followUs: 'Follow us on',
+    allRightsReserved: '© 2024 HEVY Growth. All rights reserved.',
   },
   es: {
     weAreHevy: 'Somos HEVY',
@@ -82,5 +84,7 @@ export const translations = {
     language: 'Idioma',
     english: 'Inglés',
     spanish: 'Español',
+    followUs: 'Síguenos en',
+    allRightsReserved: '© 2024 HEVY Growth. Todos los derechos reservados.',
   }
 }; 

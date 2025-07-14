@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { translations } from '../i18n/translations';
+import { event as gaEvent } from "@/lib/gtag";
 
 export default function BeHevyForm() {
   const { language } = useLanguage();
@@ -98,6 +99,11 @@ export default function BeHevyForm() {
     } finally {
       setIsSubmitting(false);
     }
+    gaEvent({
+      action: "submit_form",
+      category: "Form",
+      label: "BeHevy Application",
+    });
   };
 
   return (
